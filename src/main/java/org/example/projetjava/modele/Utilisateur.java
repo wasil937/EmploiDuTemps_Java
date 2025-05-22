@@ -19,6 +19,11 @@ public class Utilisateur {
     public String getEmail() { return email; }
     public String getMotDePasse() { return motDePasse; }
 
+    public String getRole() {
+        return "Utilisateur";
+    }
+
+
     // Authentification simple (exemple)
     public boolean seConnecter(String email, String motDePasse) {
         return this.email.equals(email) && this.motDePasse.equals(motDePasse);

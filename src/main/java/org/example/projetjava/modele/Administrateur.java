@@ -6,6 +6,12 @@ public class Administrateur extends Utilisateur {
     }
 
     @Override
+    public String getRole() {
+        return "Administrateur";
+    }
+
+
+    @Override
     public String toString() {
         return super.toString() + ", Administrateur";
     }

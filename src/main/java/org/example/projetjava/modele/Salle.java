@@ -25,7 +25,11 @@ public class Salle {
         return equipements;
     }
 
-    @Override
+    public String getNom() {
+        return numero;
+    }
+
+@Override
     public String toString() {
         return "Salle{" +
                 "numero='" + numero + '\'' +

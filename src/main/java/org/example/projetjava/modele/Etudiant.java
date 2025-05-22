@@ -13,6 +13,12 @@ public class Etudiant extends Utilisateur {
     }
 
     @Override
+    public String getRole() {
+        return "Etudiant";
+    }
+
+
+    @Override
     public String toString() {
         return super.toString() + ", Etudiant{" +
                 "numeroEtudiant='" + numeroEtudiant + '\'' +
