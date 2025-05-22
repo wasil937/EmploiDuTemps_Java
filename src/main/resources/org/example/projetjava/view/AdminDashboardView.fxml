@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.projetjava.controller.AdminDashboardController"
+      alignment="TOP_CENTER" spacing="20.0" prefHeight="600.0" prefWidth="800.0">
+    <padding>
+        <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+    </padding>
+
+    <Label fx:id="welcomeLabel" text="Panneau d'Administration">
+        <font>
+            <Font name="System Bold" size="28.0"/>
+        </font>
+    </Label>
+
+    <GridPane hgap="10" vgap="10" alignment="CENTER">
+        <columnConstraints>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0"/>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints minHeight="10.0" prefHeight="50.0" valignment="CENTER" vgrow="SOMETIMES"/>
+            <RowConstraints minHeight="10.0" prefHeight="50.0" valignment="CENTER" vgrow="SOMETIMES"/>
+            <RowConstraints minHeight="10.0" prefHeight="50.0" valignment="CENTER" vgrow="SOMETIMES"/>
+        </rowConstraints>
+        <children>
+            <Button fx:id="manageCoursesButton" text="Gérer les Cours et Emplois du Temps" onAction="#handleManageCourses" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Button fx:id="manageTeachersButton" text="Gérer les Enseignants / Affectations" onAction="#handleManageTeachers" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+            <Button fx:id="manageRoomsButton" text="Gérer les Salles" onAction="#handleManageRooms" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+            <Button fx:id="manageConflictsButton" text="Gérer les Conflits" onAction="#handleManageConflicts" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+            <Button fx:id="viewStatisticsButton" text="Voir les Statistiques" onAction="#handleViewStatistics" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+            <Button fx:id="manageUsersButton" text="Gérer les Utilisateurs (Étudiants)" onAction="#handleManageUsers" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        </children>
+        <VBox.margin>
+            <Insets top="30.0"/>
+        </VBox.margin>
+    </GridPane>
+
+    <Label fx:id="actionStatusLabel" text="" style="-fx-text-fill: green; -fx-font-style: italic;">
+        <VBox.margin>
+            <Insets top="20.0"/>
+        </VBox.margin>
+    </Label>
+
+</VBox>

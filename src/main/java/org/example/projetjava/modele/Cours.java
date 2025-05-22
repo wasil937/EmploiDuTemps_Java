@@ -21,6 +21,7 @@ public class Cours {
         return enseignant;
     }
     public int getDuree() {return duree;}
+    public String getType() {return type;}
 
     @Override
     public String toString() {
