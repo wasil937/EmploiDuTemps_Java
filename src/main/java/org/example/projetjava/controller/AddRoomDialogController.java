@@ -6,7 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.example.projetjava.modele.Salle; // Importer Salle
+import org.example.projetjava.modele.Salle;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,10 +66,6 @@ public class AddRoomDialogController {
                 .collect(Collectors.toList());
 
         // Vérification simple si la salle existe déjà (basée sur le numéro)
-        // Cette vérification devrait normalement se faire en consultant SharedDataRepository
-        // mais pour garder ce dialogue simple, on ne la fait pas ici directement.
-        // Elle sera faite dans AdminManageRoomsController avant d'ajouter.
-
         this.nouvelleSalle = new Salle(numero, capacite, equipementsList);
         closeDialog();
     }

@@ -11,8 +11,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.Alert; // Importer Alert
-import javafx.scene.control.ButtonType; // Importer ButtonType
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.projetjava.modele.*;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional; // Importer Optional
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AdminTimetableManagementController {
@@ -36,18 +36,18 @@ public class AdminTimetableManagementController {
     private ListView<String> timetableDisplayListView;
 
     @FXML
-    private Button createEntryButton; // Assurez-vous que ce fx:id existe dans votre FXML
+    private Button createEntryButton;
 
     @FXML
-    private Button deleteEntryButton; // ANCIEN editEntryButton, renommé
+    private Button deleteEntryButton;
 
     private Administrateur currentAdmin;
     private List<Utilisateur> allUsers = new ArrayList<>();
-    private List<EmploiDuTemps.Creneau> allCreneaux = new ArrayList<>(); // La source de vérité pour les créneaux
+    private List<EmploiDuTemps.Creneau> allCreneaux = new ArrayList<>();
     private ObservableList<String> timetableEntries = FXCollections.observableArrayList();
 
 
-    // ... (Constructeur et initializeDemoData() restent les mêmes) ...
+
     public AdminTimetableManagementController() {
     }
 
@@ -60,7 +60,6 @@ public class AdminTimetableManagementController {
         userDisplayNames.add("Tous les Emplois du Temps");
         // Utiliser SharedDataRepository.ALL_USERS
         for (Utilisateur user : SharedDataRepository.ALL_USERS) {
-            // ... (logique existante pour peupler ComboBox) ...
             String role = "";
             if (user instanceof Etudiant) role = " (Étudiant)";
             else if (user instanceof Enseignant) role = " (Enseignant)";
@@ -69,7 +68,6 @@ public class AdminTimetableManagementController {
             }
         }
         userSelectionComboBox.setItems(userDisplayNames);
-        // ... (reste de la méthode initialize) ...
         userSelectionComboBox.getSelectionModel().selectFirst();
         userSelectionComboBox.setOnAction(event -> displayScheduleForSelection());
         timetableDisplayListView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
@@ -86,24 +84,23 @@ public class AdminTimetableManagementController {
         List<EmploiDuTemps.Creneau> creneauxToDisplay = new ArrayList<>();
 
         if (selection.equals("Tous les Emplois du Temps")) {
-            // Utiliser SharedDataRepository.ALL_CRENEAUX
             creneauxToDisplay.addAll(SharedDataRepository.ALL_CRENEAUX);
         } else {
             String selectedUserName = selection.substring(0, selection.lastIndexOf(" (")).trim();
-            // Utiliser SharedDataRepository.ALL_USERS
+
             Utilisateur selectedUser = SharedDataRepository.ALL_USERS.stream()
                     .filter(u -> u.getNom().equals(selectedUserName))
                     .findFirst()
                     .orElse(null);
             if (selectedUser != null) {
                 if (selectedUser instanceof Enseignant) {
-                    // Utiliser SharedDataRepository.ALL_CRENEAUX
+
                     creneauxToDisplay = SharedDataRepository.ALL_CRENEAUX.stream()
                             .filter(c -> c.getCours().getEnseignant().getId() == selectedUser.getId())
                             .collect(Collectors.toList());
                 } else if (selectedUser instanceof Etudiant) {
                     final int etudiantId = selectedUser.getId();
-                    // Utiliser SharedDataRepository.ALL_CRENEAUX
+
                     creneauxToDisplay = SharedDataRepository.ALL_CRENEAUX.stream()
                             .filter(c -> (c.getEtudiantConcerne() != null && c.getEtudiantConcerne().getId() == etudiantId) ||
                                     // Simulation d'inscription basée sur les données de démo
@@ -118,8 +115,6 @@ public class AdminTimetableManagementController {
         formatAndDisplayCreneaux(creneauxToDisplay);
     }
 
-    // formatAndDisplayCreneaux reste globalement la même
-    // ...
 
     @FXML
     private void handleCreateEntry(ActionEvent event) {
@@ -128,14 +123,14 @@ public class AdminTimetableManagementController {
             Parent dialogRoot = loader.load();
 
             CreateCreneauDialogController dialogController = loader.getController();
-            // Passer les listes depuis SharedDataRepository
+            // Passer les listes nécessaires, y compris la liste des créneaux existants
             dialogController.initializeData(
                     new ArrayList<>(SharedDataRepository.ALL_COURS),
                     new ArrayList<>(SharedDataRepository.ALL_SALLES),
-                    new ArrayList<>(SharedDataRepository.ALL_USERS)
+                    new ArrayList<>(SharedDataRepository.ALL_USERS),
+                    new ArrayList<>(SharedDataRepository.ALL_CRENEAUX)
             );
 
-            // ... (logique existante pour afficher le dialogue) ...
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Créer Nouveau Créneau");
             dialogStage.initModality(Modality.APPLICATION_MODAL);
@@ -144,14 +139,17 @@ public class AdminTimetableManagementController {
 
             EmploiDuTemps.Creneau nouveauCreneau = dialogController.getNouveauCreneau();
             if (nouveauCreneau != null) {
-                // Ajouter à la liste partagée
                 SharedDataRepository.ALL_CRENEAUX.add(nouveauCreneau);
                 displayScheduleForSelection();
                 System.out.println("Nouveau créneau créé et ajouté globalement : " + nouveauCreneau);
             }
-        } catch (IOException e) { /* ... gestion erreur ... */ }
-    }
 
+        } catch (IOException e) {
+            System.err.println("Erreur lors du chargement du dialogue de création de créneau:");
+            e.printStackTrace();
+
+        }
+    }
     @FXML
     private void handleDeleteEntry(ActionEvent event) {
         String selectedItemString = timetableDisplayListView.getSelectionModel().getSelectedItem();
@@ -166,16 +164,14 @@ public class AdminTimetableManagementController {
                 "Êtes-vous sûr de vouloir supprimer le créneau suivant ?\n" + selectedItemString,
                 ButtonType.YES, ButtonType.NO);
 
-        // --> DÉCLARATION ET ASSIGNATION CRUCIALE DE 'result' ICI <--
+
         Optional<ButtonType> result = confirmationAlert.showAndWait();
 
-        // La ligne 156 (ou proche) est probablement celle-ci ou juste après :
-        if (result.isPresent() && result.get() == ButtonType.YES) {
-            // ... Logique de suppression ...
-            EmploiDuTemps.Creneau creneauASupprimer = null;
-            // ... (le reste de la logique pour trouver et supprimer le créneau) ...
 
-            // Exemple simplifié de recherche (assurez-vous que votre logique de recherche est correcte)
+        if (result.isPresent() && result.get() == ButtonType.YES) {
+
+            EmploiDuTemps.Creneau creneauASupprimer = null;
+
             for (EmploiDuTemps.Creneau c : SharedDataRepository.ALL_CRENEAUX) {
                 String typeCours = (c.getCours().getType() != null) ? c.getCours().getType() : "N/A";
                 String etudiantConcerneStr = "";
@@ -209,7 +205,6 @@ public class AdminTimetableManagementController {
         }
     }
 
-    // ... (formatAndDisplayCreneaux, etc.)
     private void formatAndDisplayCreneaux(List<EmploiDuTemps.Creneau> creneaux) {
         timetableEntries.clear();
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");

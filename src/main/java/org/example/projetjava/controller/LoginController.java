@@ -18,11 +18,6 @@ import org.example.projetjava.modele.Utilisateur;
 
 import java.io.IOException;
 
-// Potentially import classes for your main application views if you navigate from here
-// import javafx.fxml.FXMLLoader;
-// import javafx.scene.Parent;
-// import javafx.scene.Scene;
-// import java.io.IOException;
 
 public class LoginController {
 
@@ -40,16 +35,9 @@ public class LoginController {
 
     private AuthService authService;
 
-    public LoginController() {
-        // Default constructor
-        // AuthService will be set by the main application class
-    }
+    public LoginController() {}
 
-    /**
-     * Sets the authentication service. This method should be called by
-     * the main application class after loading the FXML.
-     * @param authService The AuthService instance.
-     */
+
     public void setAuthService(AuthService authService) {
         this.authService = authService;
     }
@@ -75,13 +63,10 @@ public class LoginController {
             errorMessageLabel.setText("Connexion réussie : " + utilisateurConnecte.getNom());
             System.out.println("Utilisateur connecté: " + utilisateurConnecte.getNom() + " | Role: " + getRole(utilisateurConnecte));
 
-// Dans LoginController.java, à l'intérieur de la méthode handleLoginButtonAction:
-// Supposons que 'utilisateurConnecte' est l'objet Utilisateur obtenu après un login réussi,
-// et 'loginButton' est votre bouton de connexion (pour obtenir la scène actuelle).
+
 
             if (utilisateurConnecte != null) {
-                // Message de succès (peut être affiché temporairement ou supprimé si la navigation est immédiate)
-                // errorMessageLabel.setText("Connexion réussie : " + utilisateurConnecte.getNom());
+
                 System.out.println("Utilisateur connecté: " + utilisateurConnecte.getNom() + " | Role: " + getRole(utilisateurConnecte));
 
                 Stage currentStage = (Stage) loginButton.getScene().getWindow();
@@ -136,7 +121,7 @@ public class LoginController {
                         return; // Ne pas changer de scène
                     }
 
-                    // Si newRoot a été chargé avec succès (principalement pour l'Étudiant pour l'instant)
+
                     if (newRoot != null) {
                         Scene newScene = new Scene(newRoot);
                         currentStage.setScene(newScene);
@@ -172,11 +157,7 @@ public class LoginController {
         }
     }
 
-    /**
-     * Helper method to get a string representation of the user's role.
-     * @param utilisateur The user.
-     * @return String The role of the user.
-     */
+
     private String getRole(Utilisateur utilisateur) {
         if (utilisateur instanceof Administrateur) {
             return "Administrateur";

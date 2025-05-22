@@ -13,52 +13,42 @@ import javafx.stage.Stage;
 import org.example.projetjava.modele.Cours;
 import org.example.projetjava.modele.EmploiDuTemps;
 import org.example.projetjava.modele.Salle;
-import org.example.projetjava.modele.Etudiant; // Importer Etudiant
-import org.example.projetjava.modele.Utilisateur; // Importer Utilisateur pour filtrer
+import org.example.projetjava.modele.Etudiant;
+import org.example.projetjava.modele.Utilisateur;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors; // Pour le filtrage
+import java.util.stream.Collectors;
 
 public class CreateCreneauDialogController {
 
-    @FXML
-    private ComboBox<String> coursComboBox;
 
-    @FXML
-    private ComboBox<String> salleComboBox;
+    @FXML private ComboBox<String> coursComboBox;
+    @FXML private ComboBox<String> salleComboBox;
+    @FXML private DatePicker dateDebutPicker;
+    @FXML private TextField heureDebutField;
+    @FXML private TextField minuteDebutField;
+    @FXML private ComboBox<String> etudiantComboBox;
+    @FXML private Label errorLabel;
+    @FXML private Button creerButton;
 
-    @FXML
-    private DatePicker dateDebutPicker;
-
-    @FXML
-    private TextField heureDebutField;
-
-    @FXML
-    private TextField minuteDebutField;
-
-    @FXML
-    private ComboBox<String> etudiantComboBox; // NOUVEAU @FXML
-
-    @FXML
-    private Label errorLabel;
-
-    @FXML
-    private Button creerButton;
 
     private List<Cours> availableCours;
     private List<Salle> availableSalles;
-    private List<Etudiant> availableEtudiants; // NOUVELLE LISTE
+    private List<Etudiant> availableEtudiants;
+    private List<EmploiDuTemps.Creneau> allExistingCreneaux; // NOUVEAU CHAMP pour stocker les créneaux existants
+
     private EmploiDuTemps.Creneau nouveauCreneau = null;
 
-    // Modifier la méthode initializeData
-    public void initializeData(List<Cours> cours, List<Salle> salles, List<Utilisateur> tousLesUtilisateurs) {
+
+    public void initializeData(List<Cours> cours, List<Salle> salles, List<Utilisateur> tousLesUtilisateurs, List<EmploiDuTemps.Creneau> existingCreneaux) {
         this.availableCours = cours;
         this.availableSalles = salles;
+        this.allExistingCreneaux = existingCreneaux; // Stocker les créneaux existants
 
-        // Filtrer pour obtenir seulement les étudiants
         this.availableEtudiants = tousLesUtilisateurs.stream()
                 .filter(u -> u instanceof Etudiant)
                 .map(u -> (Etudiant) u)
@@ -76,14 +66,13 @@ public class CreateCreneauDialogController {
         }
         salleComboBox.setItems(salleNumeros);
 
-        // Peupler le ComboBox des étudiants
         ObservableList<String> etudiantNoms = FXCollections.observableArrayList();
-        etudiantNoms.add("Aucun / Général"); // Option pour ne pas assigner à un étudiant spécifique
+        etudiantNoms.add("Aucun / Général");
         for (Etudiant e : availableEtudiants) {
             etudiantNoms.add(e.getNom());
         }
         etudiantComboBox.setItems(etudiantNoms);
-        etudiantComboBox.getSelectionModel().selectFirst(); // Sélectionner "Aucun / Général" par défaut
+        etudiantComboBox.getSelectionModel().selectFirst();
 
 
         errorLabel.setVisible(false);
@@ -92,7 +81,6 @@ public class CreateCreneauDialogController {
 
     @FXML
     private void handleCreerButtonAction(ActionEvent event) {
-        // ... (validation des champs existants : cours, salle, date, heure, minute) ...
         if (coursComboBox.getSelectionModel().isEmpty() ||
                 salleComboBox.getSelectionModel().isEmpty() ||
                 dateDebutPicker.getValue() == null ||
@@ -127,10 +115,29 @@ public class CreateCreneauDialogController {
                 return;
             }
 
-            LocalDateTime debut = LocalDateTime.of(dateDebut, LocalTime.of(heureDebut, minuteDebut));
-            LocalDateTime fin = debut.plusMinutes(selectedCours.getDuree());
+            LocalDateTime potentialNewDebut = LocalDateTime.of(dateDebut, LocalTime.of(heureDebut, minuteDebut));
+            LocalDateTime potentialNewFin = potentialNewDebut.plusMinutes(selectedCours.getDuree());
 
-            // Récupérer l'étudiant sélectionné
+            // Vérification des conflits de salles
+            for (EmploiDuTemps.Creneau existingCreneau : allExistingCreneaux) {
+                if (existingCreneau.getSalle().getNumero().equals(selectedSalle.getNumero())) {
+                    // La salle est la même, vérifier si les horaires se chevauchent
+                    // Chevauchement si: (StartA < EndB) and (EndA > StartB)
+                    if (potentialNewDebut.isBefore(existingCreneau.getFin()) &&
+                            potentialNewFin.isAfter(existingCreneau.getDebut())) {
+
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm 'le' dd/MM");
+                        showError("Salle '" + selectedSalle.getNumero() + "' déjà occupée par '" +
+                                existingCreneau.getCours().getNom() + "' de " +
+                                existingCreneau.getDebut().format(formatter) + " à " +
+                                existingCreneau.getFin().format(formatter) + ".");
+                        return; // Arrêter la création
+                    }
+                }
+            }
+
+
+
             Etudiant selectedEtudiant = null;
             String selectedEtudiantString = etudiantComboBox.getSelectionModel().getSelectedItem();
             if (selectedEtudiantString != null && !selectedEtudiantString.equals("Aucun / Général")) {
@@ -139,8 +146,7 @@ public class CreateCreneauDialogController {
                         .findFirst().orElse(null);
             }
 
-            // Utiliser le nouveau constructeur de Creneau
-            this.nouveauCreneau = new EmploiDuTemps.Creneau(selectedCours, selectedSalle, debut, fin, selectedEtudiant);
+            this.nouveauCreneau = new EmploiDuTemps.Creneau(selectedCours, selectedSalle, potentialNewDebut, potentialNewFin, selectedEtudiant);
             closeDialog();
 
         } catch (NumberFormatException e) {
@@ -150,6 +156,7 @@ public class CreateCreneauDialogController {
             e.printStackTrace();
         }
     }
+
 
     @FXML
     private void handleAnnulerButtonAction(ActionEvent event) {

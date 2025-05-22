@@ -2,16 +2,16 @@ package org.example.projetjava.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent; // Importer ActionEvent
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert; // Importer Alert
-import javafx.scene.control.Button; // Importer Button
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-// ... (autres imports de vos classes Modele : Cours, EmploiDuTemps, Enseignant, Salle, SharedDataRepository) ...
+
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.projetjava.modele.EmploiDuTemps;
@@ -34,21 +34,19 @@ public class TeacherScheduleController {
     @FXML
     private ListView<String> scheduleListView;
 
-    @FXML // NOUVEAU @FXML pour le bouton de signalement
+    @FXML
     private Button reportButton;
 
-    @FXML // NOUVEAU @FXML pour le label de statut (si vous voulez afficher un message)
+    @FXML
     private Label actionStatusLabel;
 
 
     private Enseignant currentEnseignant;
     private ObservableList<String> scheduleEntries = FXCollections.observableArrayList();
 
-    // Si vous n'initialisez plus de données de démo ici car elles sont dans SharedDataRepository,
-    // le constructeur peut être vide ou ne pas exister (constructeur par défaut sera utilisé).
+
     public TeacherScheduleController() {
-        // Si vous aviez initializeDemoData() ici et qu'il est maintenant dans SharedDataRepository,
-        // vous n'avez plus besoin de l'appeler ici.
+
     }
 
     public void setEnseignant(Enseignant enseignant) {
@@ -115,7 +113,6 @@ public class TeacherScheduleController {
         }
     }
 
-    // NOUVELLE MÉTHODE pour gérer l'action du bouton de signalement
     @FXML
     private void handleReportButtonAction(ActionEvent event) {
         if (currentEnseignant == null) {
@@ -145,7 +142,6 @@ public class TeacherScheduleController {
             if (reportMade != null && !reportMade.isEmpty()) {
                 // Pour la démo, on affiche juste un message.
                 // Idéalement, on ajouterait ce signalement à une liste dans SharedDataRepository
-                // Par exemple: SharedDataRepository.ALL_REPORTS.add(new Report(this.currentEnseignant, reportMade, LocalDateTime.now()));
 
                 if (actionStatusLabel != null) {
                     actionStatusLabel.setText("Signalement envoyé (simulé). Contenu loggué.");

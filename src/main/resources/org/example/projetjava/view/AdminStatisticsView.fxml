@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.projetjava.controller.AdminStatisticsController"
+            fitToWidth="true" prefHeight="600.0" prefWidth="700.0">
+    <content>
+        <VBox alignment="TOP_LEFT" spacing="15.0">
+            <padding>
+                <Insets top="20.0" right="20.0" bottom="20.0" left="20.0"/>
+            </padding>
+
+            <Label text="Statistiques d'Utilisation">
+                <font>
+                    <Font name="System Bold" size="24.0"/>
+                </font>
+            </Label>
+
+            <VBox spacing="5.0">
+                <Label text="Utilisation des Salles :">
+                    <font><Font name="System Bold" size="16.0"/></font>
+                </Label>
+                <TextArea fx:id="roomUsageTextArea" editable="false" wrapText="true" prefRowCount="5"/>
+            </VBox>
+
+            <VBox spacing="5.0">
+                <Label text="Heures par Enseignant :">
+                    <font><Font name="System Bold" size="16.0"/></font>
+                </Label>
+                <TextArea fx:id="teacherHoursTextArea" editable="false" wrapText="true" prefRowCount="5"/>
+            </VBox>
+
+            <VBox spacing="5.0">
+                <Label text="Heures par Matière (Cours) :">
+                    <font><Font name="System Bold" size="16.0"/></font>
+                </Label>
+                <TextArea fx:id="courseHoursTextArea" editable="false" wrapText="true" prefRowCount="5"/>
+            </VBox>
+
+        </VBox>
+    </content>
+</ScrollPane>

@@ -2,7 +2,7 @@ package org.example.projetjava.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent; // Importer ActionEvent
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,9 +10,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.Alert;     // Importer Alert
-import javafx.scene.control.Button;    // Importer Button
-import javafx.scene.control.ButtonType;// Importer ButtonType
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.projetjava.modele.Salle;
@@ -20,7 +20,7 @@ import org.example.projetjava.modele.SharedDataRepository;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional; // Importer Optional
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AdminManageRoomsController {
@@ -37,7 +37,7 @@ public class AdminManageRoomsController {
     @FXML
     private TableColumn<Salle, String> equipementsColumn;
 
-    @FXML // NOUVEAU @FXML pour le bouton supprimer
+    @FXML
     private Button deleteRoomButton;
 
     @FXML
@@ -54,9 +54,9 @@ public class AdminManageRoomsController {
                 )
         );
 
-        loadSallesData(); // Méthode pour charger/recharger les données
+        loadSallesData();
 
-        // Activer/Désactiver le bouton supprimer en fonction de la sélection
+
         roomsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             deleteRoomButton.setDisable(newSelection == null);
         });
@@ -81,7 +81,6 @@ public class AdminManageRoomsController {
         }
 
         // Vérification : La salle est-elle utilisée dans des créneaux ?
-        // C'est une vérification importante pour une vraie application. Pour la démo, on peut la simplifier.
         boolean isSalleUtilisee = SharedDataRepository.ALL_CRENEAUX.stream()
                 .anyMatch(creneau -> creneau.getSalle().getNumero().equals(selectedSalle.getNumero()));
 
@@ -122,14 +121,11 @@ public class AdminManageRoomsController {
             Parent dialogRoot = loader.load();
 
             AddRoomDialogController dialogController = loader.getController();
-            // Pas besoin de passer de données au dialogue pour l'instant, car il ne dépend pas de listes existantes pour se peupler.
 
             Stage dialogStage = new Stage();
             dialogStage.setTitle("Ajouter une Nouvelle Salle");
             dialogStage.initModality(Modality.APPLICATION_MODAL);
-            // Optionnel: Définir le propriétaire de la fenêtre de dialogue
-            // Stage ownerStage = (Stage) addRoomButton.getScene().getWindow();
-            // dialogStage.initOwner(ownerStage);
+
             dialogStage.setScene(new Scene(dialogRoot));
 
             dialogStage.showAndWait(); // Attendre que le dialogue soit fermé
