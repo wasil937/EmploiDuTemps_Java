@@ -61,4 +61,9 @@ public class EmploiDuTemps {
             System.out.println(c);
         }
     }
+
+    public List<Creneau> getCreneaux() {
+        return creneaux;
+    }
 }
+
