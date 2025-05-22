@@ -2,18 +2,26 @@ package org.example.projetjava.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent; // Importer ActionEvent
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert; // Importer Alert
+import javafx.scene.control.Button; // Importer Button
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import org.example.projetjava.modele.Cours;
+// ... (autres imports de vos classes Modele : Cours, EmploiDuTemps, Enseignant, Salle, SharedDataRepository) ...
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.example.projetjava.modele.EmploiDuTemps;
 import org.example.projetjava.modele.Enseignant;
-import org.example.projetjava.modele.Salle; // Vous aurez besoin de Salle si vous affichez cette info
+import org.example.projetjava.modele.SharedDataRepository; // Si vous l'utilisez pour les créneaux
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,16 +34,21 @@ public class TeacherScheduleController {
     @FXML
     private ListView<String> scheduleListView;
 
+    @FXML // NOUVEAU @FXML pour le bouton de signalement
+    private Button reportButton;
+
+    @FXML // NOUVEAU @FXML pour le label de statut (si vous voulez afficher un message)
+    private Label actionStatusLabel;
+
+
     private Enseignant currentEnseignant;
     private ObservableList<String> scheduleEntries = FXCollections.observableArrayList();
 
-    // Supposons une liste globale de tous les créneaux (pour la simulation)
-    // Dans une vraie application, cela viendrait d'un service ou d'une base de données.
-    private List<EmploiDuTemps.Creneau> allCreneauxGlobaux = new ArrayList<>();
-
+    // Si vous n'initialisez plus de données de démo ici car elles sont dans SharedDataRepository,
+    // le constructeur peut être vide ou ne pas exister (constructeur par défaut sera utilisé).
     public TeacherScheduleController() {
-        // Constructeur - initialiser les données de démonstration ici si nécessaire
-        initializeDemoData(); // Pour peupler allCreneauxGlobaux
+        // Si vous aviez initializeDemoData() ici et qu'il est maintenant dans SharedDataRepository,
+        // vous n'avez plus besoin de l'appeler ici.
     }
 
     public void setEnseignant(Enseignant enseignant) {
@@ -47,6 +60,9 @@ public class TeacherScheduleController {
     @FXML
     public void initialize() {
         scheduleListView.setItems(scheduleEntries);
+        if (actionStatusLabel != null) { // Bonne pratique de vérifier si le label est injecté
+            actionStatusLabel.setText("");
+        }
     }
 
     private void updateWelcomeMessage() {
@@ -55,58 +71,25 @@ public class TeacherScheduleController {
         }
     }
 
-    private void initializeDemoData() {
-        // Création d'enseignants (dont celui qu'on utilisera pour le test, ex: Bob)
-        Enseignant enseignantBob = new Enseignant(2, "Bob", "bob@ens.fr", "456", "Maths");
-        Enseignant enseignantAliceProf = new Enseignant(1, "Alice Prof", "alice.prof@ens.fr", "prof123", "Physique"); // Un autre prof pour la diversité des cours
-
-        // Création de quelques salles
-        Salle salleC101 = new Salle("C101", 40, Arrays.asList("Vidéoprojecteur", "PC Enseignant"));
-        Salle salleD202 = new Salle("D202", 30, Arrays.asList("Tableau Blanc"));
-
-        // Création de quelques cours
-        Cours coursMathsFondamentales = new Cours("Maths Fondamentales", "CM", 120, enseignantBob);
-        Cours coursAlgebreAvancee = new Cours("Algèbre Avancée", "TD", 90, enseignantBob);
-        Cours coursPhysiqueQuantique = new Cours("Physique Quantique", "CM", 120, enseignantAliceProf);
-        Cours coursOptiqueTD = new Cours("Optique Géométrique", "TD", 90, enseignantAliceProf);
-
-
-        // Ajout de créneaux à la liste globale
-        // Créneaux pour Enseignant Bob
-        allCreneauxGlobaux.add(new EmploiDuTemps.Creneau(coursMathsFondamentales, salleC101,
-                LocalDateTime.of(2024, 5, 27, 10, 0), LocalDateTime.of(2024, 5, 27, 12, 0)));
-        allCreneauxGlobaux.add(new EmploiDuTemps.Creneau(coursAlgebreAvancee, salleD202,
-                LocalDateTime.of(2024, 5, 28, 14, 0), LocalDateTime.of(2024, 5, 28, 15, 30)));
-        allCreneauxGlobaux.add(new EmploiDuTemps.Creneau(coursMathsFondamentales, salleC101, // Un autre cours pour Bob
-                LocalDateTime.of(2024, 5, 29, 10, 0), LocalDateTime.of(2024, 5, 29, 12, 0)));
-
-
-        // Créneaux pour Enseignant AliceProf (pour montrer que le filtre fonctionne)
-        allCreneauxGlobaux.add(new EmploiDuTemps.Creneau(coursPhysiqueQuantique, salleC101,
-                LocalDateTime.of(2024, 5, 27, 14, 0), LocalDateTime.of(2024, 5, 27, 16, 0)));
-        allCreneauxGlobaux.add(new EmploiDuTemps.Creneau(coursOptiqueTD, salleD202,
-                LocalDateTime.of(2024, 5, 30, 9, 0), LocalDateTime.of(2024, 5, 30, 10, 30)));
-    }
-
-
     private void populateSchedule() {
         if (currentEnseignant == null) {
+            scheduleEntries.clear(); // Vider la liste si pas d'enseignant
+            scheduleEntries.add("Aucun enseignant sélectionné.");
             return;
         }
         scheduleEntries.clear();
 
-        // Filtrer les créneaux pour l'enseignant courant
-        // On compare les IDs car ce sont des objets distincts même si les noms/emails sont identiques
-        List<EmploiDuTemps.Creneau> teacherCreneaux = allCreneauxGlobaux.stream()
+        // Filtrer les créneaux pour l'enseignant courant depuis SharedDataRepository
+        List<EmploiDuTemps.Creneau> teacherCreneaux = SharedDataRepository.ALL_CRENEAUX.stream()
                 .filter(creneau -> creneau.getCours().getEnseignant().getId() == currentEnseignant.getId())
                 .sorted(Comparator.comparing(EmploiDuTemps.Creneau::getDebut))
                 .collect(Collectors.toList());
 
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy"); // yyyy pour l'année
 
         if (teacherCreneaux.isEmpty()) {
-            scheduleEntries.add("Aucun cours programmé pour cet enseignant.");
+            scheduleEntries.add("Aucun cours programmé pour vous.");
             return;
         }
 
@@ -115,7 +98,7 @@ public class TeacherScheduleController {
             String creneauDateStr = creneau.getDebut().format(dateFormatter);
             if (!creneauDateStr.equals(currentDate)) {
                 if (!scheduleEntries.isEmpty()) {
-                    scheduleEntries.add(""); // Ligne vide pour séparer les jours
+                    scheduleEntries.add("");
                 }
                 scheduleEntries.add("--- " + creneauDateStr.toUpperCase() + " ---");
                 currentDate = creneauDateStr;
@@ -129,6 +112,60 @@ public class TeacherScheduleController {
                     creneau.getSalle().getNumero()
             );
             scheduleEntries.add(entry);
+        }
+    }
+
+    // NOUVELLE MÉTHODE pour gérer l'action du bouton de signalement
+    @FXML
+    private void handleReportButtonAction(ActionEvent event) {
+        if (currentEnseignant == null) {
+            if (actionStatusLabel != null) actionStatusLabel.setText("Erreur: Enseignant non identifié.");
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Impossible d'identifier l'enseignant pour le signalement.");
+            errorAlert.showAndWait();
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/projetjava/view/ReportDialog.fxml"));
+            Parent dialogRoot = loader.load();
+
+            ReportDialogController dialogController = loader.getController();
+            dialogController.setReportingTeacher(this.currentEnseignant); // Passer l'enseignant actuel au dialogue
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Faire un Signalement");
+            dialogStage.initModality(Modality.APPLICATION_MODAL); // Bloque la fenêtre parente
+            // Stage ownerStage = (Stage) reportButton.getScene().getWindow(); // Optionnel: définir le propriétaire
+            // dialogStage.initOwner(ownerStage);
+            dialogStage.setScene(new Scene(dialogRoot));
+
+            dialogStage.showAndWait(); // Attendre que le dialogue soit fermé
+
+            String reportMade = dialogController.getReportContent();
+            if (reportMade != null && !reportMade.isEmpty()) {
+                // Pour la démo, on affiche juste un message.
+                // Idéalement, on ajouterait ce signalement à une liste dans SharedDataRepository
+                // Par exemple: SharedDataRepository.ALL_REPORTS.add(new Report(this.currentEnseignant, reportMade, LocalDateTime.now()));
+
+                if (actionStatusLabel != null) {
+                    actionStatusLabel.setText("Signalement envoyé (simulé). Contenu loggué.");
+                }
+                Alert infoAlert = new Alert(Alert.AlertType.INFORMATION, "Votre signalement a été enregistré (simulation).\nContenu: " + reportMade);
+                infoAlert.setHeaderText("Signalement Pris en Compte");
+                infoAlert.showAndWait();
+            } else {
+                if (actionStatusLabel != null) {
+                    actionStatusLabel.setText("Signalement annulé.");
+                }
+            }
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors du chargement du dialogue de signalement:");
+            e.printStackTrace();
+            if (actionStatusLabel != null)
+                actionStatusLabel.setText("Erreur: Impossible d'ouvrir le dialogue de signalement.");
+            Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Impossible d'ouvrir le formulaire de signalement.");
+            errorAlert.showAndWait();
         }
     }
 }

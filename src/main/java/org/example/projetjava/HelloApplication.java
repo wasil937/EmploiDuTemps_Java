@@ -7,7 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.example.projetjava.controller.LoginController;
 import org.example.projetjava.modele.AuthService;
-import org.example.projetjava.modele.SharedDataRepository; // <-- NOUVEL IMPORT
+import org.example.projetjava.modele.SharedDataRepository;
 
 // Supprimez ces imports s'ils ne sont plus utilisés directement ici après le déplacement des données
 // import org.example.projetjava.modele.Etudiant;

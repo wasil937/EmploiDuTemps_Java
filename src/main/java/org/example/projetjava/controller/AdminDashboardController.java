@@ -20,20 +20,12 @@ public class AdminDashboardController {
     @FXML
     private Button manageCoursesButton;
 
-    @FXML
-    private Button manageTeachersButton;
+
 
     @FXML
     private Button manageRoomsButton;
 
-    @FXML
-    private Button manageConflictsButton;
 
-    @FXML
-    private Button viewStatisticsButton;
-
-    @FXML
-    private Button manageUsersButton;
 
     @FXML
     private Label actionStatusLabel;
@@ -42,10 +34,6 @@ public class AdminDashboardController {
 
     public void setAdministrateur(Administrateur admin) {
         this.currentAdmin = admin;
-        // Vous pouvez faire d'autres initialisations ici si la vue
-        // dépend de l'administrateur connecté.
-        // Par exemple, mettre à jour un label de bienvenue si vous en avez un.
-        System.out.println("AdminTimetableManagementController initialisé pour l'admin: " + (admin != null ? admin.getNom() : "null"));
     }
 
     @FXML
@@ -109,29 +97,7 @@ public class AdminDashboardController {
         }
     }
 
-    @FXML
-    private void handleManageConflicts(ActionEvent event) {
-        String message = "Action: Gérer les Conflits (Implémentation à venir)";
-        System.out.println(message);
-        actionStatusLabel.setText(message);
-        // Ici, vous chargeriez une nouvelle vue pour la gestion des conflits.
-    }
 
-    @FXML
-    private void handleViewStatistics(ActionEvent event) {
-        String message = "Action: Voir les Statistiques (Implémentation à venir)";
-        System.out.println(message);
-        actionStatusLabel.setText(message);
-        // Ici, vous chargeriez une nouvelle vue pour les statistiques.
-    }
-
-    @FXML
-    private void handleManageUsers(ActionEvent event) {
-        String message = "Action: Gérer les Utilisateurs (Étudiants) (Implémentation à venir)";
-        System.out.println(message);
-        actionStatusLabel.setText(message);
-        // Ici, vous chargeriez une nouvelle vue pour la gestion des utilisateurs étudiants.
-    }
 
     @FXML
     private void handleManageCourses(ActionEvent event) {

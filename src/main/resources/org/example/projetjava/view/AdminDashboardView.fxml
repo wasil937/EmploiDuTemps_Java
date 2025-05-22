@@ -24,23 +24,16 @@
 
     <GridPane hgap="10" vgap="10" alignment="CENTER">
         <columnConstraints>
-            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0"/>
-            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="200.0"/>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0"/>
+            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0"/>
         </columnConstraints>
         <rowConstraints>
-            <RowConstraints minHeight="10.0" prefHeight="50.0" valignment="CENTER" vgrow="SOMETIMES"/>
-            <RowConstraints minHeight="10.0" prefHeight="50.0" valignment="CENTER" vgrow="SOMETIMES"/>
             <RowConstraints minHeight="10.0" prefHeight="50.0" valignment="CENTER" vgrow="SOMETIMES"/>
         </rowConstraints>
         <children>
             <Button fx:id="manageCoursesButton" text="Gérer les Cours et Emplois du Temps" onAction="#handleManageCourses" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-            <Button fx:id="manageTeachersButton" text="Gérer les Enseignants / Affectations" onAction="#handleManageTeachers" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+            <Button fx:id="manageRoomsButton" text="Gérer les Salles" onAction="#handleManageRooms" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
 
-            <Button fx:id="manageRoomsButton" text="Gérer les Salles" onAction="#handleManageRooms" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-            <Button fx:id="manageConflictsButton" text="Gérer les Conflits" onAction="#handleManageConflicts" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-            <Button fx:id="viewStatisticsButton" text="Voir les Statistiques" onAction="#handleViewStatistics" maxWidth="Infinity" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-            <Button fx:id="manageUsersButton" text="Gérer les Utilisateurs (Étudiants)" onAction="#handleManageUsers" maxWidth="Infinity" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
         </children>
         <VBox.margin>
             <Insets top="30.0"/>

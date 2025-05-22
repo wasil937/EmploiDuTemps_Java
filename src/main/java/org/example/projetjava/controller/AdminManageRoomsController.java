@@ -2,15 +2,25 @@ package org.example.projetjava.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent; // Importer ActionEvent
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import org.example.projetjava.modele.Administrateur; // Si vous voulez passer l'admin
+import javafx.scene.control.Alert;     // Importer Alert
+import javafx.scene.control.Button;    // Importer Button
+import javafx.scene.control.ButtonType;// Importer ButtonType
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.example.projetjava.modele.Salle;
-import org.example.projetjava.modele.SharedDataRepository; // Pour accéder aux données partagées
+import org.example.projetjava.modele.SharedDataRepository;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional; // Importer Optional
 import java.util.stream.Collectors;
 
 public class AdminManageRoomsController {
@@ -25,65 +35,129 @@ public class AdminManageRoomsController {
     private TableColumn<Salle, Integer> capaciteColumn;
 
     @FXML
-    private TableColumn<Salle, String> equipementsColumn; // Affichera la liste des équipements comme une chaîne
+    private TableColumn<Salle, String> equipementsColumn;
 
-    // private Administrateur currentAdmin; // Décommentez si vous passez l'admin
+    @FXML // NOUVEAU @FXML pour le bouton supprimer
+    private Button deleteRoomButton;
 
-    // public void setAdministrateur(Administrateur admin) { // Décommentez si vous passez l'admin
-    //    this.currentAdmin = admin;
-    // }
+    @FXML
+    private Button addRoomButton;
 
     @FXML
     public void initialize() {
-        // Configurer les colonnes pour qu'elles sachent comment obtenir les données de l'objet Salle
         numeroColumn.setCellValueFactory(new PropertyValueFactory<>("numero"));
         capaciteColumn.setCellValueFactory(new PropertyValueFactory<>("capacite"));
 
-        // Pour la liste des équipements, nous allons la convertir en une chaîne
-        equipementsColumn.setCellValueFactory(cellData -> {
-            List<String> equipements = cellData.getValue().getEquipements();
+        equipementsColumn.setCellValueFactory(cellData ->
+                new javafx.beans.property.SimpleStringProperty(
+                        String.join(", ", cellData.getValue().getEquipements() != null ? cellData.getValue().getEquipements() : List.of("N/A"))
+                )
+        );
 
-            // Convertit la liste en une chaîne séparée par des virgules
-            String equipStr = equipements.stream().collect(Collectors.joining(", "));
-            // PropertyValueFactory attend un ObservableValue, mais pour une chaîne simple,
-            // on peut la wrapper. Cependant, pour TableColumn<Salle, String>,
-            // il est plus simple de retourner une SimpleStringProperty ou similaire.
-            // Ici, nous allons utiliser une astuce : retourner une ObservableList d'un seul élément
-            // et la TableCell par défaut fera toString(). Pour une meilleure solution, utilisez setCellFactory.
-            // MAIS pour PropertyValueFactory, le type doit correspondre.
-            // Changeons cela pour utiliser une cell factory pour plus de flexibilité et de propreté.
-            // Pour l'instant, une solution simple si Salle::getEquipements() retournait String :
-            // Ou si vous avez une méthode dans Salle qui retourne la chaîne formatée :
-            // equipementsColumn.setCellValueFactory(new PropertyValueFactory<>("formattedEquipements")); // Si une telle méthode existait
+        loadSallesData(); // Méthode pour charger/recharger les données
 
-            // Solution simple avec setCellValueFactory et conversion manuelle :
-            // Note: le type de retour doit être ObservableValue<String>.
-            // On va le faire plus simplement dans setCellFactory pour l'instant ou juste afficher le toString() de la liste.
-            // Pour PropertyValueFactory, la propriété doit exister DANS l'objet Salle.
-            // Nous allons donc ajouter une méthode getFormattedEquipements() dans Salle.java pour la propreté.
-            // Ou, plus simple pour l'instant, laissons PropertyValueFactory et modifions Salle pour avoir une méthode qui retourne la chaîne.
-            // Alternative (si vous ne voulez pas modifier Salle) :
-            // equipementsColumn.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(String.join(", ", data.getValue().getEquipements())));
-            // Pour l'instant, on va supposer que vous allez ajouter une méthode à Salle, c'est plus propre.
-            // Si Salle a `public String getEquipementsAsString() { return String.join(", ", equipements); }`
-            // alors vous pouvez faire :
-            // equipementsColumn.setCellValueFactory(new PropertyValueFactory<>("equipementsAsString"));
-            // Pour la démo immédiate, on va juste afficher le toString() de la liste (pas idéal mais rapide)
-            // Pour cela, la colonne doit être TableColumn<Salle, List<String>> et utiliser une cellFactory
-            // Pour garder TableColumn<Salle, String>, on se fie à PropertyValueFactory qui appelle un getter.
-            // Créons une méthode getFormattedEquipements dans Salle.java (voir étape 4)
-            return new javafx.beans.property.SimpleStringProperty(String.join(", ", cellData.getValue().getEquipements()));
+        // Activer/Désactiver le bouton supprimer en fonction de la sélection
+        roomsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            deleteRoomButton.setDisable(newSelection == null);
         });
+    }
 
-
-        // Charger les données depuis SharedDataRepository
+    private void loadSallesData() {
         ObservableList<Salle> sallesList = FXCollections.observableArrayList(SharedDataRepository.ALL_SALLES);
         roomsTableView.setItems(sallesList);
-
         if (sallesList.isEmpty()) {
             System.out.println("Aucune salle à afficher depuis SharedDataRepository.");
         }
+    }
 
-        equipementsColumn.setCellValueFactory(new PropertyValueFactory<>("formattedEquipements"));
+    @FXML
+    private void handleDeleteRoom(ActionEvent event) {
+        Salle selectedSalle = roomsTableView.getSelectionModel().getSelectedItem();
+
+        if (selectedSalle == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Veuillez sélectionner une salle à supprimer.");
+            alert.showAndWait();
+            return;
+        }
+
+        // Vérification : La salle est-elle utilisée dans des créneaux ?
+        // C'est une vérification importante pour une vraie application. Pour la démo, on peut la simplifier.
+        boolean isSalleUtilisee = SharedDataRepository.ALL_CRENEAUX.stream()
+                .anyMatch(creneau -> creneau.getSalle().getNumero().equals(selectedSalle.getNumero()));
+
+        if (isSalleUtilisee) {
+            Alert alert = new Alert(Alert.AlertType.ERROR,
+                    "Cette salle est actuellement utilisée dans un ou plusieurs créneaux et ne peut pas être supprimée.\n" +
+                            "Veuillez d'abord modifier ou supprimer les créneaux concernés.");
+            alert.setHeaderText("Suppression Impossible");
+            alert.showAndWait();
+            return;
+        }
+
+        // Confirmation de suppression
+        Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION,
+                "Êtes-vous sûr de vouloir supprimer la salle : " + selectedSalle.getNumero() + "?",
+                ButtonType.YES, ButtonType.NO);
+        confirmationAlert.setHeaderText("Confirmation de Suppression");
+        Optional<ButtonType> result = confirmationAlert.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.YES) {
+            boolean removed = SharedDataRepository.ALL_SALLES.remove(selectedSalle);
+            if (removed) {
+                System.out.println("Salle supprimée : " + selectedSalle.getNumero());
+                loadSallesData(); // Recharger les données pour mettre à jour le TableView
+
+                Alert infoAlert = new Alert(Alert.AlertType.INFORMATION, "La salle a été supprimée avec succès.");
+                infoAlert.showAndWait();
+            } else {
+                Alert errorAlert = new Alert(Alert.AlertType.ERROR, "Erreur lors de la suppression de la salle.");
+                errorAlert.showAndWait();
+            }
+        }
+    }
+    @FXML
+    private void handleAddRoom(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/projetjava/view/AddRoomDialog.fxml"));
+            Parent dialogRoot = loader.load();
+
+            AddRoomDialogController dialogController = loader.getController();
+            // Pas besoin de passer de données au dialogue pour l'instant, car il ne dépend pas de listes existantes pour se peupler.
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Ajouter une Nouvelle Salle");
+            dialogStage.initModality(Modality.APPLICATION_MODAL);
+            // Optionnel: Définir le propriétaire de la fenêtre de dialogue
+            // Stage ownerStage = (Stage) addRoomButton.getScene().getWindow();
+            // dialogStage.initOwner(ownerStage);
+            dialogStage.setScene(new Scene(dialogRoot));
+
+            dialogStage.showAndWait(); // Attendre que le dialogue soit fermé
+
+            Salle nouvelleSalle = dialogController.getNouvelleSalle();
+            if (nouvelleSalle != null) {
+                // Vérifier si une salle avec le même numéro existe déjà (simple vérification)
+                boolean salleExisteDeja = SharedDataRepository.ALL_SALLES.stream()
+                        .anyMatch(salle -> salle.getNumero().equalsIgnoreCase(nouvelleSalle.getNumero()));
+
+                if (salleExisteDeja) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Une salle avec le numéro '" + nouvelleSalle.getNumero() + "' existe déjà.");
+                    alert.showAndWait();
+                } else {
+                    SharedDataRepository.ALL_SALLES.add(nouvelleSalle); // Ajouter à la liste partagée
+                    loadSallesData(); // Rafraîchir le TableView
+                    System.out.println("Nouvelle salle ajoutée : " + nouvelleSalle.getNumero());
+
+                    Alert infoAlert = new Alert(Alert.AlertType.INFORMATION, "La salle '" + nouvelleSalle.getNumero() + "' a été ajoutée avec succès.");
+                    infoAlert.showAndWait();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Erreur lors du chargement du dialogue d'ajout de salle:");
+            e.printStackTrace();
+            // Afficher une alerte à l'utilisateur
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Impossible d'ouvrir le formulaire d'ajout de salle.");
+            alert.showAndWait();
+        }
     }
 }

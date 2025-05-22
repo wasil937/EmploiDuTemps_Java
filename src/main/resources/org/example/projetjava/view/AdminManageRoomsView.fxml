@@ -34,9 +34,8 @@
         <padding>
             <Insets top="10.0"/>
         </padding>
-        <Button text="Ajouter Salle (à faire)" disable="true"/>
-        <Button text="Modifier Salle (à faire)" disable="true"/>
-        <Button text="Supprimer Salle (à faire)" disable="true"/>
+        <Button fx:id="addRoomButton" text="Ajouter Salle" onAction="#handleAddRoom"/>
+        <Button fx:id="deleteRoomButton" text="Supprimer Salle Sélectionnée" onAction="#handleDeleteRoom" disable="true"/>
     </HBox>
 
 </VBox>
