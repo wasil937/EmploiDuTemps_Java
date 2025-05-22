@@ -5,6 +5,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import org.example.projetjava.modele.Administrateur;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality; // Pour ouvrir dans une nouvelle fenêtre modale (optionnel)
+import javafx.stage.Stage;
+import java.io.IOException;
 
 public class AdminDashboardController {
 
@@ -51,13 +57,6 @@ public class AdminDashboardController {
         }
     }
 
-    @FXML
-    private void handleManageCourses(ActionEvent event) {
-        String message = "Action: Gérer les Cours et Emplois du Temps (Implémentation à venir)";
-        System.out.println(message);
-        actionStatusLabel.setText(message);
-        // Ici, vous chargeriez une nouvelle vue ou un dialogue pour la gestion des cours.
-    }
 
     @FXML
     private void handleManageTeachers(ActionEvent event) {
@@ -97,5 +96,46 @@ public class AdminDashboardController {
         System.out.println(message);
         actionStatusLabel.setText(message);
         // Ici, vous chargeriez une nouvelle vue pour la gestion des utilisateurs étudiants.
+    }
+
+    @FXML
+    private void handleManageCourses(ActionEvent event) {
+        // String message = "Action: Gérer les Cours et Emplois du Temps (Implémentation à venir)";
+        // System.out.println(message);
+        // actionStatusLabel.setText(message);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/projetjava/view/AdminTimetableManagementView.fxml"));
+            Parent timetableManagementRoot = loader.load();
+
+            // Passer l'objet Administrateur au nouveau contrôleur si nécessaire
+            AdminTimetableManagementController controller = loader.getController();
+            if (controller != null) {
+                controller.setAdministrateur(this.currentAdmin); // Assurez-vous que currentAdmin est bien initialisé
+            } else {
+                System.err.println("Erreur: AdminTimetableManagementController n'a pas pu être chargé.");
+                actionStatusLabel.setText("Erreur interne (Contrôleur Gestion EDT).");
+                return;
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Gestion des Emplois du Temps");
+            stage.setScene(new Scene(timetableManagementRoot));
+
+            // Optionnel: rendre la fenêtre modale pour bloquer l'interaction avec le tableau de bord admin tant qu'elle est ouverte
+            // stage.initModality(Modality.APPLICATION_MODAL);
+            // Stage ownerStage = (Stage) manageCoursesButton.getScene().getWindow(); // Récupérer la fenêtre actuelle pour définir le propriétaire
+            // stage.initOwner(ownerStage);
+
+            stage.showAndWait(); // Ou stage.show() si vous ne voulez pas bloquer
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors du chargement de la vue de gestion des emplois du temps:");
+            e.printStackTrace();
+            actionStatusLabel.setText("Erreur chargement vue Gestion EDT.");
+        } catch (Exception e) {
+            System.err.println("Erreur inattendue :");
+            e.printStackTrace();
+            actionStatusLabel.setText("Erreur inattendue. Consultez la console.");
+        }
     }
 }

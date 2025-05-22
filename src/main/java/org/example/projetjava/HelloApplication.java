@@ -34,7 +34,7 @@ public class HelloApplication extends Application {
 
         // Passer l'instance de AuthService au LoginController
         LoginController loginController = loader.getController();
-        loginController.setAuthService(this.authService); // Vous devrez ajouter cette méthode setAuthService dans LoginController
+        loginController.setAuthService(this.authService);
 
         primaryStage.setTitle("Connexion");
         primaryStage.setScene(new Scene(root));
