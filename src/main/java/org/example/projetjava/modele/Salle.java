@@ -29,6 +29,13 @@ public class Salle {
         return numero;
     }
 
+    public String getFormattedEquipements() {
+        if (equipements == null || equipements.isEmpty()) {
+            return "Aucun";
+        }
+        return String.join(", ", equipements);
+    }
+
 @Override
     public String toString() {
         return "Salle{" +

@@ -45,7 +45,7 @@
                 <Insets top="15.0"/>
             </padding>
             <Button fx:id="createEntryButton" text="Créer Créneau" onAction="#handleCreateEntry"/>
-            <Button fx:id="editEntryButton" text="Modifier Créneau Sélectionné" onAction="#handleEditEntry" disable="true"/>
+            <Button fx:id="deleteEntryButton" text="Supprimer Créneau Sélectionné" onAction="#handleDeleteEntry" disable="true"/>
         </HBox>
     </bottom>
 </BorderPane>

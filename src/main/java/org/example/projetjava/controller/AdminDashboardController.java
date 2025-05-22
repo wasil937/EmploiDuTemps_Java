@@ -42,7 +42,10 @@ public class AdminDashboardController {
 
     public void setAdministrateur(Administrateur admin) {
         this.currentAdmin = admin;
-        updateWelcomeMessage();
+        // Vous pouvez faire d'autres initialisations ici si la vue
+        // dépend de l'administrateur connecté.
+        // Par exemple, mettre à jour un label de bienvenue si vous en avez un.
+        System.out.println("AdminTimetableManagementController initialisé pour l'admin: " + (admin != null ? admin.getNom() : "null"));
     }
 
     @FXML
@@ -68,10 +71,42 @@ public class AdminDashboardController {
 
     @FXML
     private void handleManageRooms(ActionEvent event) {
-        String message = "Action: Gérer les Salles (Implémentation à venir)";
-        System.out.println(message);
-        actionStatusLabel.setText(message);
-        // Ici, vous chargeriez une nouvelle vue pour la gestion des salles.
+        // String message = "Action: Gérer les Salles (Implémentation à venir)";
+        // System.out.println(message);
+        // actionStatusLabel.setText(message);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/projetjava/view/AdminManageRoomsView.fxml"));
+            Parent manageRoomsRoot = loader.load();
+
+            // Si vous avez besoin de passer l'objet Admin au AdminManageRoomsController:
+            // AdminManageRoomsController controller = loader.getController();
+            // if (controller != null) {
+            //     controller.setAdministrateur(this.currentAdmin); // Assurez-vous que currentAdmin est initialisé
+            // } else {
+            //     System.err.println("Erreur: AdminManageRoomsController n'a pas pu être chargé.");
+            //     if(actionStatusLabel != null) actionStatusLabel.setText("Erreur interne (Contrôleur Gestion Salles).");
+            //     return;
+            // }
+
+            Stage stage = new Stage();
+            stage.setTitle("Gestion des Salles");
+            stage.setScene(new Scene(manageRoomsRoot));
+            // Optionnel: rendre modal
+            // stage.initModality(Modality.APPLICATION_MODAL);
+            // Stage ownerStage = (Stage) ((Node)event.getSource()).getScene().getWindow();
+            // stage.initOwner(ownerStage);
+
+            stage.showAndWait(); // Ou show() si vous ne voulez pas bloquer
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors du chargement de la vue de gestion des salles:");
+            e.printStackTrace();
+            if(actionStatusLabel != null) actionStatusLabel.setText("Erreur chargement vue Gestion Salles.");
+        } catch (Exception e) {
+            System.err.println("Erreur inattendue lors de l'ouverture de la gestion des salles:");
+            e.printStackTrace();
+            if(actionStatusLabel != null) actionStatusLabel.setText("Erreur inattendue. Consultez la console.");
+        }
     }
 
     @FXML
@@ -121,12 +156,9 @@ public class AdminDashboardController {
             stage.setTitle("Gestion des Emplois du Temps");
             stage.setScene(new Scene(timetableManagementRoot));
 
-            // Optionnel: rendre la fenêtre modale pour bloquer l'interaction avec le tableau de bord admin tant qu'elle est ouverte
-            // stage.initModality(Modality.APPLICATION_MODAL);
-            // Stage ownerStage = (Stage) manageCoursesButton.getScene().getWindow(); // Récupérer la fenêtre actuelle pour définir le propriétaire
-            // stage.initOwner(ownerStage);
 
-            stage.showAndWait(); // Ou stage.show() si vous ne voulez pas bloquer
+
+            stage.showAndWait();
 
         } catch (IOException e) {
             System.err.println("Erreur lors du chargement de la vue de gestion des emplois du temps:");

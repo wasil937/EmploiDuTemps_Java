@@ -42,6 +42,10 @@
 
         <Label text="Minute de début (mm):" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
         <TextField fx:id="minuteDebutField" promptText="mm (ex: 30)" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="Étudiant concerné (Optionnel):" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="etudiantComboBox" prefWidth="250.0" GridPane.rowIndex="5" GridPane.columnIndex="1" promptText="Aucun"/>
+
     </GridPane>
 
     <Label fx:id="errorLabel" style="-fx-text-fill: red;" managed="false" visible="false"/>

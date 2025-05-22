@@ -5,26 +5,34 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.example.projetjava.controller.LoginController; // Assurez-vous d'importer votre LoginController
-import org.example.projetjava.modele.*; // Importer vos modèles
+import org.example.projetjava.controller.LoginController;
+import org.example.projetjava.modele.AuthService;
+import org.example.projetjava.modele.SharedDataRepository; // <-- NOUVEL IMPORT
+
+// Supprimez ces imports s'ils ne sont plus utilisés directement ici après le déplacement des données
+// import org.example.projetjava.modele.Etudiant;
+// import org.example.projetjava.modele.Enseignant;
+// import org.example.projetjava.modele.Administrateur;
+// import java.util.Arrays;
+// import java.util.List;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public class HelloApplication extends Application {
 
-    private AuthService authService;
+    private AuthService authService; // Cette instance sera utilisée par LoginController
 
     @Override
     public void init() throws Exception {
-        // Initialiser les utilisateurs et AuthService ici
-        // C'est la même logique que dans votre Main.java actuel
-        Etudiant etu = new Etudiant(1, "Alice", "alice@etu.fr", "123", "E001");
-        Enseignant ens = new Enseignant(2, "Bob", "bob@ens.fr", "456", "Maths");
-        Administrateur admin = new Administrateur(3, "Claire", "admin@univ.fr", "admin");
-        this.authService = new AuthService(Arrays.asList(etu, ens, admin));
+        super.init(); // Appel à la méthode init de la classe parente (bonne pratique)
+
+        // 1. Initialiser les données partagées une seule fois au démarrage de l'application
+        SharedDataRepository.initializeData();
+
+        // 2. Initialiser AuthService avec la liste des utilisateurs depuis le dépôt partagé
+        // Note : SharedDataRepository.ALL_USERS est déjà une List<Utilisateur>
+        this.authService = new AuthService(SharedDataRepository.ALL_USERS);
     }
 
     @Override
@@ -32,11 +40,17 @@ public class HelloApplication extends Application {
         FXMLLoader loader = new FXMLLoader(Objects.requireNonNull(getClass().getResource("/org/example/projetjava/view/LoginView.fxml")));
         Parent root = loader.load();
 
-        // Passer l'instance de AuthService au LoginController
+        // Passer l'instance de AuthService (maintenant initialisée avec les données partagées) au LoginController
         LoginController loginController = loader.getController();
-        loginController.setAuthService(this.authService);
+        if (loginController != null) {
+            loginController.setAuthService(this.authService);
+        } else {
+            System.err.println("ERREUR: LoginController n'a pas pu être chargé depuis FXML. Vérifiez fx:controller dans LoginView.fxml.");
+            // Vous pourriez vouloir arrêter l'application ici ou afficher une alerte
+            // car sans LoginController, la connexion ne fonctionnera pas.
+        }
 
-        primaryStage.setTitle("Connexion");
+        primaryStage.setTitle("Système de Gestion des Emplois du Temps - Connexion"); // Titre mis à jour
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
